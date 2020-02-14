@@ -579,7 +579,7 @@ bool L1TMuonBarrelKalmanAlgo::updateOffline(L1MuKBMTrack& track,const L1MuKBMTCo
    
     int phiBNew = wrapAround(trackPhiB+int(Gain(2,0)*residual(0)+Gain(2,1)*residual(1)),4096);
     //Changed 
-    track.setResidual(stub->stNum()-1,fabs(phi-phiNew)>>(bitsPhi_-bitsPhiPrim)+fabs(phiB-phiBNew)/8);
+    track.setResidual(stub->stNum()-1,fabs(phi-phiNew)*pow(2,bitsPhiPrim_-bitsPhi_)+fabs(phiB-phiBNew)/8);
 
 
     if (verbose_) {
@@ -655,7 +655,7 @@ bool L1TMuonBarrelKalmanAlgo::updateOffline1D(L1MuKBMTrack& track,const L1MuKBMT
     }
     track.setKalmanGain(track.step(),fabs(trackK),Gain(0,0),0.0,Gain(1,0),0.0,Gain(2,0),0.0);
     
-    //Changed
+    //Changedo
     int KNew  = wrapAround(trackK+int(Gain(0,0)*residual),8192);
     //Changed
     int phiNew;
@@ -860,7 +860,7 @@ void L1TMuonBarrelKalmanAlgo::vertexConstraintLUT(L1MuKBMTrack& track) {
   std::pair<float,float> GAIN = lutService_->vertexGain(track.hitPattern(),absK/2);
   track.setKalmanGain(track.step(),fabs(track.curvature()),GAIN.first,GAIN.second,-1);
 
-  int k_0 = fp_product(GAIN.first,int(residual),7);
+  int k_0 = fp_product(GAIN.first,int(residual)>>(bitsPhi_-bitsPhiPrim_),7);
   int KNew = wrapAround(track.curvature()+k_0,8192);
 
   if (verbose_) {
@@ -869,8 +869,8 @@ void L1TMuonBarrelKalmanAlgo::vertexConstraintLUT(L1MuKBMTrack& track) {
   }
 
 
-  int p_0 = fp_product(GAIN.second,int(residual),7);
-  int phiNew = wrapAround(track.positionAngle()+p_0,8192);
+  int p_0 = fp_product(GAIN.second,int(residual),7+bitsPhi_-bitsPhiPrim_);
+  int phiNew = wrapAround(track.positionAngle()+p_0,8192<<(bitsPhi_-bitsPhiPrim_));
   track.setCoordinatesAtVertex(KNew,phiNew,-residual);
 }
 
