@@ -1434,10 +1434,10 @@ int L1TMuonBarrelKalmanAlgo::phiAt2(const L1MuKBMTrack& track) {
   int phiNew=phi+fp_product(phiAt2_,phiB,10);
   if (verbose_)
     printf("Phi at second station=%d\n",phiNew);
-  if (phiNew>4095)
-    phiNew=4095;
-  if (phiNew<-4096)
-    phiNew=-4096;
+  if (phiNew>(4096<<(bitsPhi_-bitsPhiPrim_)-1))
+    phiNew=4096<<(bitsPhi_-bitsPhiPrim_)-1;
+  if (phiNew<(-4096<<(bitsPhi_-bitsPhiPrim_)))
+    phiNew=-4096<<(bitsPhi_-bitsPhiPrim_);
   return phiNew;
 
 }
