@@ -118,6 +118,9 @@ class L1TMuonBarrelKalmanAlgo {
 
   //STUFF NOT USED IN THE FIRMWARE BUT ONLY FOR DEBUGGING
   ///////////////////////////////////////////////////////
+  
+  int bitsPhi_;
+  int bitsPhiPrim_;
 
   bool useOfflineAlgo_;
   std::vector<double> mScatteringPhi_;
@@ -128,8 +131,6 @@ class L1TMuonBarrelKalmanAlgo {
   double pointResolutionPhiB_;
   //point resolution for vertex
   double pointResolutionVertex_;
-
-  
 
   //Sorter
   class StubSorter {

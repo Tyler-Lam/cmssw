@@ -37,13 +37,17 @@ bmtfKalmanTrackingSettings = cms.PSet(
     combos2=cms.vint32(3),
     combos1=cms.vint32(), #for future possible usage
 
+    bitsPhi = cms.int32(14),
+    bitsPhiPrim = cms.int32(14)
+
     useOfflineAlgo = cms.bool(False),   
     ###Only for the offline algo -not in firmware --------------------
     mScatteringPhi = cms.vdouble(2.49e-3,5.47e-5,3.49e-5,1.37e-5),
     mScatteringPhiB = cms.vdouble(7.22e-3,3.461e-3,4.447e-3,4.12e-3),
     pointResolutionPhi = cms.double(1.),
     pointResolutionPhiB = cms.double(500.),
-    pointResolutionVertex = cms.double(1.)
+    pointResolutionVertex = cms.double(1.),
+    
 )
 
 
