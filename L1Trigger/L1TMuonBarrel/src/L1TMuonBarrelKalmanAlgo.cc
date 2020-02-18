@@ -860,7 +860,7 @@ void L1TMuonBarrelKalmanAlgo::vertexConstraintLUT(L1MuKBMTrack& track) {
   std::pair<float,float> GAIN = lutService_->vertexGain(track.hitPattern(),absK/2);
   track.setKalmanGain(track.step(),fabs(track.curvature()),GAIN.first,GAIN.second,-1);
 
-  int k_0 = fp_product(GAIN.first,int(residual)>>(bitsPhi_-bitsPhiPrim_),7);
+  int k_0 = fp_product(GAIN.first,int(residual),7);
   int KNew = wrapAround(track.curvature()+k_0,8192);
 
   if (verbose_) {
@@ -869,7 +869,7 @@ void L1TMuonBarrelKalmanAlgo::vertexConstraintLUT(L1MuKBMTrack& track) {
   }
 
 
-  int p_0 = fp_product(GAIN.second,int(residual),7+bitsPhi_-bitsPhiPrim_);
+  int p_0 = fp_product(GAIN.second,int(residual),7)<<(bitsPhi_-bitsPhiPrim_);
   int phiNew = wrapAround(track.positionAngle()+p_0,8192<<(bitsPhi_-bitsPhiPrim_));
   track.setCoordinatesAtVertex(KNew,phiNew,-residual);
 }
