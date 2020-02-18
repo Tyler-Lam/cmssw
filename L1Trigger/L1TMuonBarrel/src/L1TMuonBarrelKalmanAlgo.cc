@@ -1514,10 +1514,10 @@ int L1TMuonBarrelKalmanAlgo::phiAt2(const L1MuKBMTrack& track) {
   if (verbose_)
     printf("Phi at second station=%d\n",phiNew);
   //Changed
-  if (phiNew>(4096*pow(2,bitsPhi_-bitsPhiPrim_)-1))
-    phiNew=4096<<(bitsPhi_-bitsPhiPrim_)-1;
-  if (phiNew<(-4096*pow(2,bitsPhi_-bitsPhiPrim_)))
-    phiNew=-4096<<(bitsPhi_-bitsPhiPrim_);
+  if (phiNew > (4096<<(bitsPhi_-bitsPhiPrim_)-1))
+      phiNew = (4096<<(bitsPhi_-bitsPhiPrim_)) - 1;
+  if (phiNew < (-4096<<(bitsPhi_-bitsPhiPrim_)))
+    phiNew = -4096<<(bitsPhi_-bitsPhiPrim_);
   return phiNew;
 
 }
