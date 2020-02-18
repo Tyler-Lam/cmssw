@@ -225,7 +225,7 @@ std::pair<bool,uint> L1TMuonBarrelKalmanAlgo::match(const L1MuKBMTCombinedStubRe
     if (stub->stNum()!=step) 
       continue;
 
-    uint distance = fabs(wrapAround(((correctedPhi(seed,seed->scNum())-correctedPhi(stub,seed->scNum()))>>3),1024<<(bitsPhi_-bitsPhiPrim)));
+    uint distance = fabs(wrapAround(((correctedPhi(seed,seed->scNum())-correctedPhi(stub,seed->scNum()))>>3),1024<<(bitsPhi_-bitsPhiPrim_)));
 
     if (stub->scNum()==previousSector) {
       if (stub->whNum()==wheel) {
@@ -552,7 +552,7 @@ bool L1TMuonBarrelKalmanAlgo::updateOffline(L1MuKBMTrack& track,const L1MuKBMTCo
     int phiNew  = wrapAround(trackPhi+residual(0),8192<<(bitsPhi_-bitsPhiPrim_));
     int phiBNew = wrapAround(trackPhiB+int(Gain(2,0)*residual(0)+Gain(2,1)*residual(1)),4096);
     
-    track.setResidual(stub->stNum()-1,fabs(phi-phiNew)>>(bitsPhi_-bitsPhiPrim_)+fabs(phiB-phiBNew)/8);
+    track.setResidual(stub->stNum()-1,fabs(phi-phiNew)*pow(2,bitsPhi_-bitsPhiPrim_)+fabs(phiB-phiBNew)/8);
 
 
     if (verbose_) {

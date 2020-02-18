@@ -38,7 +38,7 @@ bmtfKalmanTrackingSettings = cms.PSet(
     combos1=cms.vint32(), #for future possible usage
 
     bitsPhi = cms.int32(14),
-    bitsPhiPrim = cms.int32(14)
+    bitsPhiPrim = cms.int32(14),
 
     useOfflineAlgo = cms.bool(False),   
     ###Only for the offline algo -not in firmware --------------------
