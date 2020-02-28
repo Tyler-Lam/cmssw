@@ -750,7 +750,7 @@ void L1TMuonBarrelKalmanAlgo::vertexConstraintOffline(L1MuKBMTrack& track) {
 
   const std::vector<double>& covLine = track.covariance();
   L1MuKBMTrack::CovarianceMatrix cov(covLine.begin(),covLine.end());
-  
+
   double S = (ROOT::Math::Similarity(H,cov))(0,0)+pointResolutionVertex_;
   S=1.0/S;
   Matrix31 Gain = cov*(ROOT::Math::Transpose(H))*S;
