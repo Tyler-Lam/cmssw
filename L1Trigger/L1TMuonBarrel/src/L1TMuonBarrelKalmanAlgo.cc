@@ -554,11 +554,14 @@ bool L1TMuonBarrelKalmanAlgo::updateOffline(L1MuKBMTrack& track,const L1MuKBMTCo
     }
 
     CovarianceMatrix2 S = ROOT::Math::Similarity(H,cov)+R;
+    if (verbose_)
+      std::cout<<"S = H*cov*H^T+R = \n"<<H<<"\n"<<cov<<"\n"<<ROOT::Math::Transpose(H)<<"\n + \n"<<R<<"\n = \n"<<S<<std::endl;
     if (!S.Invert())
       return false;
     Matrix32 Gain = cov*ROOT::Math::Transpose(H)*S;
     if (verbose_){
-      std::cout<<"Kalman Gain:\n"<<Gain<<std::endl;
+      std::cout<<"S^-1 = \n"<<S<<std::endl;
+      std::cout<<"Kalman Gain = cov*H^T*S = \n"<<Gain<<std::endl;
     }
 
     track.setKalmanGain(track.step(),fabs(trackK),Gain(0,0),Gain(0,1),Gain(1,0),Gain(1,1),Gain(2,0),Gain(2,1));

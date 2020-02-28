@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 bmtfKalmanTrackingSettings = cms.PSet(
-    verbose = cms.bool(False),  # 
+    verbose = cms.bool(True),  # 
     lutFile = cms.string("L1Trigger/L1TMuon/data/bmtf_luts/kalmanLUTs.root"),
     initialK = cms.vdouble(-1.196,-1.581,-2.133,-2.263),
     initialK2 = cms.vdouble(-3.26e-4,-7.165e-4,2.305e-3,-5.63e-3),
@@ -37,7 +37,7 @@ bmtfKalmanTrackingSettings = cms.PSet(
     combos2=cms.vint32(3),
     combos1=cms.vint32(), #for future possible usage
 
-    useOfflineAlgo = cms.bool(False),   
+    useOfflineAlgo = cms.bool(True),   
     updatePhi = cms.bool(False), # Use kalman gain to update Phi instead of taking stub value
     ###Only for the offline algo -not in firmware --------------------
     mScatteringPhi = cms.vdouble(2.49e-3,5.47e-5,3.49e-5,1.37e-5),
@@ -47,6 +47,7 @@ bmtfKalmanTrackingSettings = cms.PSet(
 #    pointResolutionPhi = cms.double(64*1.),
     pointResolutionPhiB = cms.double(500.),
     pointResolutionVertex = cms.double(1.),
+
 
     bitsPhi = cms.int32(14),
     bitsPhiPrim = cms.int32(14)
@@ -62,7 +63,7 @@ simKBmtfDigis = cms.EDProducer("L1TMuonBarrelKalmanTrackProducer",
     algoSettings = bmtfKalmanTrackingSettings,
     trackFinderSettings = cms.PSet(
         sectorsToProcess = cms.vint32(0,1,2,3,4,5,6,7,8,9,10,11),
-        verbose = cms.int32(0),
+        verbose = cms.int32(1),
         sectorSettings = cms.PSet(
 #            verbose = cms.int32(1),
             verbose = cms.int32(0),
