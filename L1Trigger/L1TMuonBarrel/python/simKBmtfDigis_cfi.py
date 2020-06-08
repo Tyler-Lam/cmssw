@@ -21,7 +21,7 @@ bmtfKalmanTrackingSettings = cms.PSet(
     chiSquare = cms.vdouble(0.0,0.109375,0.234375,0.359375),   
     chiSquareCutPattern = cms.vint32(7,11,13,14,15),
     chiSquareCutCurvMax = cms.vint32(2500,2500,2500,2500,2500),
-    chiSquareCut = cms.vint32(126,126,126,126,126),
+    chiSquareCut = cms.vint32(126,126,126,40,40),
 
     #vertex cuts
     trackComp = cms.vdouble(1.75,1.25,0.625,0.250),   
@@ -29,8 +29,8 @@ bmtfKalmanTrackingSettings = cms.PSet(
     trackCompErr2 = cms.vdouble(0.218750,0.218750,0.218750,0.3125),   
     trackCompCutPattern = cms.vint32(3,5,6,9,10,12),   
     trackCompCutCurvMax = cms.vint32(34,34,34,34,34,34),   #this is shifted<<4
-    trackCompCut        = cms.vint32(15,15,15,15,15,15),  
-    chiSquareCutTight   = cms.vint32(40,126,60,126,126,126),  
+    trackCompCut        = cms.vint32(13,15,9,15,15,11),  
+    chiSquareCutTight   = cms.vint32(25,50,30,126,126,30),  
 
     combos4=cms.vint32(9,10,11,12,13,14,15),
     combos3=cms.vint32(5,6,7),
@@ -38,12 +38,19 @@ bmtfKalmanTrackingSettings = cms.PSet(
     combos1=cms.vint32(), #for future possible usage
 
     useOfflineAlgo = cms.bool(False),   
+    updatePhi = cms.bool(False), # Use kalman gain to update Phi instead of taking stub value
     ###Only for the offline algo -not in firmware --------------------
-    mScatteringPhi = cms.vdouble(2.49e-3,5.47e-5,3.49e-5,1.37e-5),
+#    mScatteringPhi = cms.vdouble(2.49e-3,5.47e-5,3.49e-5,1.37e-5),
+    mScatteringPhi = cms.vdouble(64*2.49e-3,64*5.47e-5,64*3.49e-5,64*1.37e-5),
     mScatteringPhiB = cms.vdouble(7.22e-3,3.461e-3,4.447e-3,4.12e-3),
-    pointResolutionPhi = cms.double(1.),
+#    pointResolutionPhi = cms.double(1.),
+    pointResolutionPhi = cms.double(64*1.),
     pointResolutionPhiB = cms.double(500.),
-    pointResolutionVertex = cms.double(1.)
+    pointResolutionVertex = cms.double(1.),
+
+    bitsPhi = cms.int32(14),
+#    bitsPhiPrim = cms.int32(14)
+    bitsPhiPrim = cms.int32(11)
 )
 
 
