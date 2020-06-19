@@ -125,7 +125,7 @@ class L1TMuonBarrelKalmanAlgo {
   //point resolution for phi
   std::vector<double> pointResolutionPhi_;
   //point resolution for phiB
-  std::vector<double> pointResolutionPhiB_;
+  double pointResolutionPhiB_;
   //point resolution for vertex
   double pointResolutionVertex_;
 

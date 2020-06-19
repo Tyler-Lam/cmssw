@@ -34,12 +34,12 @@ L1TMuonBarrelKalmanAlgo::L1TMuonBarrelKalmanAlgo(const edm::ParameterSet& settin
   mScatteringPhi_(settings.getParameter<std::vector<double> >("mScatteringPhi")),
   mScatteringPhiB_(settings.getParameter<std::vector<double> >("mScatteringPhiB")),
   pointResolutionPhi_(settings.getParameter<std::vector<double> >("pointResolutionPhi")),
-  pointResolutionPhiB_(settings.getParameter<std::vector<double> >("pointResolutionPhiB")),
+  pointResolutionPhiB_(settings.getParameter<double>("pointResolutionPhiB")),
   pointResolutionVertex_(settings.getParameter<double>("pointResolutionVertex")),
   
   bitsPhi_(settings.getParameter<int>("bitsPhi")),
-  bitsPhiB_(settings.getParameter<int>("bitsPhi")),
-  phiBScale_(settings.getParameter<int>("bitsPhi"))
+  bitsPhiB_(settings.getParameter<int>("bitsPhiB")),
+  phiBScale_(settings.getParameter<int>("phiBScale"))
   
 {
 
@@ -545,8 +545,12 @@ bool L1TMuonBarrelKalmanAlgo::updateOffline(L1MuKBMTrack& track,const L1MuCorrel
     R(0,0) = pointResolutionPhi_[step];
     R(0,1) = 0.0;
     R(1,0) = 0.0;
-    R(1,1) = pointResolutionPhiB_[step];
+    R(1,1) = pointResolutionPhiB_;
 
+    if (verbose_){
+      printf("pointResolutionPhi = %f\n",pointResolutionPhi_[step]);
+      printf("pointResolutionPhiB = %f\n", pointResolutionPhiB_);
+    }
     const std::vector<double>& covLine = track.covariance();
     L1MuKBMTrack::CovarianceMatrix cov(covLine.begin(),covLine.end());
     
@@ -638,6 +642,11 @@ bool L1TMuonBarrelKalmanAlgo::updateOffline1D(L1MuKBMTrack& track,const L1MuCorr
     }
 
     double S = ROOT::Math::Similarity(H,cov)(0,0)+pointResolutionPhi_[step];
+
+    if (verbose_){
+      printf("pointResolutionPhi = %f\n",pointResolutionPhi_[step]);
+    }
+
    
     if (S==0.0)
       return false;
@@ -652,7 +661,7 @@ bool L1TMuonBarrelKalmanAlgo::updateOffline1D(L1MuKBMTrack& track,const L1MuCorr
     
     int phiNew = wrapAround(trackPhi+residual, 1<<(bitsPhi_+1));
 
-    int phiBNew = wrapAround(trackPhiB+int(Gain(2,0)*residual),(1<<(bitsPhiB_+1))*phiBScale_);
+    int phiBNew = wrapAround(trackPhiB+int(Gain(2,0)*residual),(1<<(bitsPhiB_-1))*phiBScale_);
     track.setCoordinates(track.step(),KNew,phiNew,phiBNew);
 
     if (verbose_){
@@ -693,8 +702,8 @@ bool L1TMuonBarrelKalmanAlgo::updateLUT(L1MuKBMTrack& track,const L1MuCorrelator
     int phi  = correctedPhi(stub,track.sector());
     int phiB = correctedPhiB(stub);
 
-    if (stub->quality()<4)
-      phiB=trackPhiB;
+    //if (stub->quality()<4)
+    //  phiB=trackPhiB;
 
     Vector2 residual;
     // Changed
@@ -938,22 +947,26 @@ std::pair<bool,L1MuKBMTrack> L1TMuonBarrelKalmanAlgo::chain(const L1MuCorrelator
 
     int address=phiB;
     //TODO
-    if (track.step()==4 && (fabs(seed->phiB())>15))
-      address=charge*15*phiBScale_;
+    if (track.step()==4 && (fabs(seed->phiB())>50))
+      address=charge*50*phiBScale_;
 
-    if (track.step()==3 && (fabs(seed->phiB())>30))
-      address=charge*30*phiBScale_;
-    if (track.step()==2 && (fabs(seed->phiB())>127))
-      address=charge*127*phiBScale_;         
+    if (track.step()==3 && (fabs(seed->phiB())>100))
+      address=charge*100*phiBScale_;
+    if (track.step()==2 && (fabs(seed->phiB())>250))
+      address=charge*250*phiBScale_;         
     int initialK = int(initK_[seed->depthRegion()-1]*address/(1+initK2_[seed->depthRegion()-1]*charge*address));
-
+    
+    if (verbose_){
+      printf("Initial K = %f*%d/(1+%f*abs(%d))\n",initK_[seed->depthRegion()-1], address, initK2_[seed->depthRegion()-1], address);
+    }
+    
     if (initialK>8191)
       initialK=8191;
     if (initialK<-8191)
       initialK=-8191;
 
     track.setCoordinates(seed->depthRegion(),initialK,correctedPhi(seed,seed->phiRegion()),phiB);
-    if (seed->quality()<4) {
+    if (seed->quality()<5) {
       track.setCoordinates(seed->depthRegion(),0,correctedPhi(seed,seed->phiRegion()),0);     
     }
 
@@ -964,22 +977,23 @@ std::pair<bool,L1MuKBMTrack> L1TMuonBarrelKalmanAlgo::chain(const L1MuCorrelator
     L1MuKBMTrack::CovarianceMatrix covariance;  
 
 
-    float DK=512*512.;
+    float DK=512.*512.;
 
     covariance(0,0)=DK;
     covariance(0,1)=0;
     covariance(0,2)=0;
     covariance(1,0)=0;
 
-    covariance(1,1)=float(pointResolutionPhi_[track.step()]);
+    covariance(1,1)=float(pointResolutionPhi_[track.step()-1]);
     covariance(1,2)=0;
     covariance(2,0)=0;
     covariance(2,1)=0;
-    covariance(2,2)=float(pointResolutionPhiB_[track.step()]);
+    covariance(2,2)=float(pointResolutionPhiB_);
     track.setCovariance(covariance);
     //
     if (verbose_) {
       printf("New Kalman fit staring at step=%d, phi=%d,phiB=%d with curvature=%d\n",track.step(),track.positionAngle(),track.bendingAngle(),track.curvature());
+      std::cout<<"Initial Covariance Matrix:\n"<<covariance<<std::endl;
       printf("BITMASK:");
       for (unsigned int i=0;i<4;++i)
 	printf("%d",getBit(mask,i));
@@ -1160,7 +1174,7 @@ int L1TMuonBarrelKalmanAlgo::rank(const L1MuKBMTrack& track) {
     if (hitPattern(track)==customBitmask(0,0,1,1))
       return 60;
     //    return offset+(track.stubs().size()*2+track.quality())*80-track.approxChi2();
-    return 160+(track.stubs().size())*20-chi;
+    return 160+(track.stubs().size())*26-chi;
 
 }
 
@@ -1314,7 +1328,7 @@ int L1TMuonBarrelKalmanAlgo::fp_product(float a,int b, uint bits) {
 
 
 int L1TMuonBarrelKalmanAlgo::ptLUT(int K) {
-  //  int charge = (K>=0) ? +1 : -1;
+  int charge = (K>=0) ? +1 : -1;
   float lsb=1.25/float(1<<13);
   float FK = fabs(K);
 
@@ -1325,16 +1339,13 @@ int L1TMuonBarrelKalmanAlgo::ptLUT(int K) {
     FK=26.;   
 
   FK=FK*lsb;
-
-  //step 1 -material and B-field
-  //  FK = 0.898*FK/(1.0-0.6*FK);
-  //step 2 -low Pt
-  //  FK=FK-26.382*FK*FK*FK*FK*FK;
-  //step 3 - misalignment
-  //  FK=FK-charge*1.408e-3;
-  //Get to BMTF
-  //  FK=FK/1.17;
-
+ 
+    //step 1 -material and B-field
+  FK = .7959*FK/(1.0-0.5036*FK);
+  //step 2 - misalignment
+  FK = FK-charge*1.047e-04;
+  //Get to BMTF scale
+  FK = FK/1.16;
 
   int pt=0;
   if (FK!=0)
