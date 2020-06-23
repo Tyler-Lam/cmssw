@@ -132,6 +132,7 @@ class L1TMuonBarrelKalmanAlgo {
   int bitsPhi_;
   int bitsPhiB_;
   int phiBScale_;
+  int bitsK_;
   //Sorter
   class StubSorter {
   public:

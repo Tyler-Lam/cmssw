@@ -49,12 +49,12 @@ def segINT(seg,f1=1,f2=1):
     return seg.phi()*f1,seg.phiB()*f2
 
 
-def qPTInt(qPT,bits=14):
+def qPTInt(qPT,bits=17):
     lsb = lsBIT(bits)
     floatbinary = int(math.floor(abs(qPT)/lsb))
     return int((qPT/abs(qPT))*floatbinary)
 
-def lsBIT(bits=14):
+def lsBIT(bits=17):
     maximum=1.25
     lsb = 1.25/pow(2,bits-1)
     return lsb
@@ -147,6 +147,7 @@ PHIFACTOR = 1
 PHIBFACTOR = 56
 RELFACTOR = 1
 
+
 initK = [-0.0628, -0.0869, -0.122, -0.272]
 initK2 = [-1.385e-05, -2.985e-05, -1.402e-4, -4.923e-4]
 
@@ -154,17 +155,17 @@ DROR = {4:0.173*RELFACTOR,3:0.209*RELFACTOR,2:0.182*RELFACTOR}
 DRORB = {4:(1+0.173),3:(1+0.209),2:(1+0.182)}
 alpha = {4:-0.0523,3:-0.0793,2:-0.0619}
 beta = {4:0.069,3:0.079,2:0.055}
-aPhi = {4:0.21069, 3:0.3041, 2:0.29151, 1:36.710}
-aPhiB = {4:-2.5352, 3:-2.8715, 2:-2.3438, 1: -26.9696}
-aPhiBNLO = 1.5679e-4
-trackComp = [-4.9412, -3.3872, -1.9231, -0.82207]
+aPhi = {4:0.0236, 3:0.03794, 2:0.037123, 1: 5.25100}
+aPhiB = {4:-.35931, 3:-0.40417, 2:-.32815, 1: -3.7226}
+aPhiBNLO = 3.9857e-5
+trackComp = [-.5781,-.4224,-.24655,-.11516]
 DRORCHI = {4: (726.-433.)/726. ,
            3: (619.-433.)/619. ,
            2: (512.-433.)/512.}
 
 
-binsk = 1024
-maxk=65536
+binsk = 256
+maxk=32768
 
 
 histos={}
@@ -197,20 +198,25 @@ for i,j in itertools.permutations([1,2,3,4],2):
     
     
 for s in [1,2,3,4]:
-    histos['curvFromPhiB'][s]=ROOT.TH2D("curvFromPhiB_"+str(s),"",1024,-512,511,4*50,-4*400,4*400)
-    histos['phiBFromCurv'][s]=ROOT.TH2D("phiBFromCurv_"+str(s),"",128,-256,255,256,-4*511,4*512)
-    histos['phiProp'][s]=ROOT.TH2D("phiProp_"+str(s),"",binsk/2+1,-maxk,maxk,50,-16*200,16*200)
+    histos['curvFromPhiB'][s]=ROOT.TH2D("curvFromPhiB_"+str(s),"",256,-512,511,200,-10000,10000)
+    histos['phiBFromCurv'][s]=ROOT.TH2D("phiBFromCurv_"+str(s),"",64,-512,511,128,-511,512)
+    histos['phiProp'][s]=ROOT.TH2D("phiProp_"+str(s),"",binsk,-maxk,maxk,100,-2000,2000)
     histos['phiPropChiV'][s]=ROOT.TH2D("phiPropChiV_"+str(s),"",binsk,-maxk,maxk,50,-16*200,16*200)
     histos['phiPropChi'][s]=ROOT.TH2D("phiPropChi_"+str(s),"",binsk,-3000,3000,50,-16*200,16*200)
     histos['phiBProp'][s]=ROOT.TH2D("phiBProp_"+str(s),"",binsk/2-1,-maxk,maxk,100,-4*2000,4*2000)
-    histos['deltaPhiVsK'][s] = ROOT.TH2D("deltaPhiVsK_"+str(s),"", binsk,-maxk,maxk,256,-511,511)
-    histos['deltaPhiBVsK'][s] = ROOT.TH2D("deltaPhiBVsK_"+str(s),"", binsk,-maxk,maxk,256,-2000,2000)
+    if s != 1:
+        histos['deltaPhiVsK'][s] = ROOT.TH2D("deltaPhiVsK_"+str(s),"", binsk,-maxk,maxk,256,-511,511)
+        histos['deltaPhiBVsK'][s] = ROOT.TH2D("deltaPhiBVsK_"+str(s),"", binsk,-maxk,maxk,256,-2000,2000)
+    else:
+        histos['deltaPhiVsK'][s] = ROOT.TH2D("deltaPhiVsK_"+str(s),"", binsk,-maxk,maxk,256,-2048,2048)
+        histos['deltaPhiBVsK'][s] = ROOT.TH2D("deltaPhiBVsK_"+str(s),"", binsk,-maxk,maxk,256,-8192,8192)
+
     histos['initKVsPhiB'][s] = ROOT.TH2D("initK_{}".format(s), "", 1024, -4*512, 4*511, 400, -4*400, 4*400)
-    histos['compErr'][s] = ROOT.TH2D("compErr_{}".format(s), "", 128, -256, 255, 256, -1024, 1023)
+    histos['compErr'][s] = ROOT.TH2D("compErr_{}".format(s), "", 128, -maxk/8, maxk/8, 256, -1024, 1023)
     histos['curv'][s] = ROOT.TH1D("curv_{}".format(s), "", 2048, -4096, 4096)
 
-vertexPhi = ROOT.TH2D("vertexPhi", "", binsk/2+1, -maxk, maxk, 200, -2**16, 2**16)
-vertexPhiB = ROOT.TH2D("vertexPhiB", "", binsk/2+1, -maxk, maxk, 200, -2048*32, 2048*32)
+vertexPhi = ROOT.TH2D("vertexPhi", "",300 , -15000, 15000, 200, -2**16, 2**16)
+vertexPhiB = ROOT.TH2D("vertexPhiB", "", binsk/4, -maxk, maxk, 50, -2048*32, 2048*32)
 vertexELoss = ROOT.TH2D("vertexELoss", "", binsk, -maxk,maxk,binsk,-maxk,maxk)
 phiAt2 = ROOT.TH2D("phiAt2", "", binsk,-maxk,maxk, 1024, -4*512,4*512)    
 
@@ -284,6 +290,7 @@ for event in events:
             if s1.depthRegion()+1==s2.depthRegion():                
                 st=s2.depthRegion()    
                 qPT=trueKINT[st]
+                
                 propPhi = phi2-phiB2*DROR[st]+aPhi[st]*qPT    
                 propPhiB =DRORB[st]*phiB2+aPhiB[st]*qPT
                 dPhi = propPhi-phi1

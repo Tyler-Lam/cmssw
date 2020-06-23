@@ -1,17 +1,17 @@
 import FWCore.ParameterSet.Config as cms
 
 bmtfKalmanTrackingSettings = cms.PSet(
-    verbose = cms.bool(True),  # 
+    verbose = cms.bool(False),  # 
     lutFile = cms.string("L1Trigger/L1TMuon/data/bmtf_luts/kalmanLUTs.root"),
 
     # New Primitives
-    initialK = cms.vdouble(-0.0681, -0.0968, -0.148, -0.266),
-    initialK2 = cms.vdouble(1.204e-05, 2.627e-05, 1.225e-4, 6.173e-4),
-    eLoss = cms.vdouble(7.7586e-4,0,0,0),
+    initialK = cms.vdouble(-0.0628, -0.0869, -0.122, -0.272),
+    initialK2 = cms.vdouble(-1.385e-05, -2.985e-05, -1.402e-4, -4.923e-4),
+    eLoss = cms.vdouble(4.8113e-05,0,0,0),
 
-    aPhi = cms.vdouble(36.710, 0.29151, 0.3041, 0.21069),
-    aPhiB = cms.vdouble(-27.517, -2.34376, -2.87148, -2.53521),
-    aPhiBNLO = cms.vdouble(1.5679e-4, 0, 0, 0),
+    aPhi = cms.vdouble(28.8644, 0.037123, 0.037938, 0.023599),
+    aPhiB = cms.vdouble(-3.7224, -0.32812, -0.40417, -0.35931),
+    aPhiBNLO = cms.vdouble(3.9837e-05, 0, 0, 0),
 
     bPhi = cms.vdouble(-1, .182, .209, .173),
     bPhiB = cms.vdouble(-1, 1.182, 1.209, 1.173),
@@ -21,15 +21,15 @@ bmtfKalmanTrackingSettings = cms.PSet(
 
     #generic cuts
     #TODO: Rederive chi2 cuts (current is approx. scaling)
-    chiSquare = cms.vdouble(0, 2.269, 4.680, 6.661),
+    chiSquare = cms.vdouble(0, 0.29214, 0.66757, 1.0072),
     chiSquareCutPattern = cms.vint32(7,11,13,14,15),
     chiSquareCutCurvMax = cms.vint32(2500,2500,2500,2500,2500),
     chiSquareCut = cms.vint32(164,164,164,52,52),
 
     #vertex cuts
-    trackComp = cms.vdouble(-5.367, -3.460, -1.408, -0.604),
-    trackCompErr1 = cms.vdouble(1.8409, 2.2599, 2.1162, 1.4874),
-    trackCompErr2 = cms.vdouble(0.55314, 0.50953, 0.52020, 0.60119),
+    trackComp = cms.vdouble(-0.57813, -0.42240, -0.24656, -0.11516),
+    trackCompErr1 = cms.vdouble(2.8889, 3.4395, 3.1346, 3.7926),
+    trackCompErr2 = cms.vdouble(0.056439, 0.045330, 0.050258, 0.030278),
     trackCompCutPattern = cms.vint32(3,5,6,9,10,12),   
     trackCompCutCurvMax = cms.vint32(34,34,34,34,34,34),   #this is shifted<<4
     trackCompCut        = cms.vint32(13,15,9,15,15,11),  
@@ -42,10 +42,12 @@ bmtfKalmanTrackingSettings = cms.PSet(
     combos1=cms.vint32(), #for future possible usage
 
     useOfflineAlgo = cms.bool(True),   
+    mScatteringPhi = cms.vdouble(0.130219, 0.000175645, 0.000543927, 0.0002668461),
+    mScatteringPhiB = cms.vdouble(0.0547912, 0.0325894, 0.0394612, 0.0354706),
 
-    mScatteringPhi = cms.vdouble(1.092,.02399,.01531,0.006009),
+#    mScatteringPhi = cms.vdouble(1.092,.02399,.01531,0.006009),
 #    mScatteringPhi = cms.vdouble(3.633, 0.0678, 0.0320, 0.0129),
-    mScatteringPhiB = cms.vdouble(3.167,1.518,1.951,1.807),
+#    mScatteringPhiB = cms.vdouble(3.167,1.518,1.951,1.807),
 #    mScatteringPhiB = cms.vdouble(1.085, 0.552, 0.725, 0.750),
     # Assuming 0.01cm resolution
     pointResolutionPhi = cms.vdouble(3.579, 2.56, 1.751, 1.273),
@@ -58,6 +60,7 @@ bmtfKalmanTrackingSettings = cms.PSet(
     bitsPhi = cms.int32(17),
     bitsPhiB = cms.int32(12),
     phiBScale = cms.int32(56),
+    bitsK = cms.int32(17),
 )
 
 
@@ -69,7 +72,7 @@ simKBmtfDigis = cms.EDProducer("L1TMuonBarrelKalmanTrackProducer",
     algoSettings = bmtfKalmanTrackingSettings,
     trackFinderSettings = cms.PSet(
         sectorsToProcess = cms.vint32(0,1,2,3,4,5,6,7,8,9,10,11),
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         sectorSettings = cms.PSet(
 #            verbose = cms.int32(1),
             verbose = cms.int32(0),

@@ -39,8 +39,8 @@ L1TMuonBarrelKalmanAlgo::L1TMuonBarrelKalmanAlgo(const edm::ParameterSet& settin
   
   bitsPhi_(settings.getParameter<int>("bitsPhi")),
   bitsPhiB_(settings.getParameter<int>("bitsPhiB")),
-  phiBScale_(settings.getParameter<int>("phiBScale"))
-  
+  phiBScale_(settings.getParameter<int>("phiBScale")),
+  bitsK_(settings.getParameter<int>("bitsK"))
 {
 
 
@@ -395,10 +395,10 @@ void L1TMuonBarrelKalmanAlgo::propagate(L1MuKBMTrack& track) {
 
   int KBound=K;
 
-   if (KBound>4095)
-    KBound=4095;
-  if (KBound<-4095)
-    KBound=-4095;
+  if (KBound >= (1<<(bitsK_-2)))
+    KBound = (1<<(bitsK_-2))-1;
+  if (KBound <= -(1<<(bitsK_-2)))
+    KBound = -(1<<(bitsK_-2))+1;
 
   int deltaK=0;
   int KNew=0;
@@ -570,7 +570,7 @@ bool L1TMuonBarrelKalmanAlgo::updateOffline(L1MuKBMTrack& track,const L1MuCorrel
 
     int KNew  = (trackK+int(Gain(0,0)*residual(0)+Gain(0,1)*residual(1)));
     
-    if (fabs(KNew)>8192)
+    if (fabs(KNew) > (1<<(bitsK_-1)))
       return false;
 
     
@@ -657,7 +657,7 @@ bool L1TMuonBarrelKalmanAlgo::updateOffline1D(L1MuKBMTrack& track,const L1MuCorr
     track.setKalmanGain(track.step(),fabs(trackK),Gain(0,0),0.0,Gain(1,0),0.0,Gain(2,0),0.0);
     
     
-    int KNew  = wrapAround(trackK+int(Gain(0,0)*residual),8192);
+    int KNew  = wrapAround(trackK+int(Gain(0,0)*residual),1<<(bitsK_-1));
     
     int phiNew = wrapAround(trackPhi+residual, 1<<(bitsPhi_+1));
 
@@ -716,8 +716,8 @@ bool L1TMuonBarrelKalmanAlgo::updateLUT(L1MuKBMTrack& track,const L1MuCorrelator
 
 
     uint absK = fabs(trackK);
-    if (absK>4095)
-      absK = 4095;
+    if (absK > 32767)
+      absK = 32767;
 
     std::vector<float> GAIN;
     //For the three stub stuff use only gains 0 and 4
@@ -740,9 +740,9 @@ bool L1TMuonBarrelKalmanAlgo::updateLUT(L1MuKBMTrack& track,const L1MuCorrelator
     int k_0 = fp_product(GAIN[0],residualPhi,3);
     int k_1 = fp_product(GAIN[1],residualPhiB,5);
     int KNew  = trackK+k_0+k_1;
-    if (fabs(KNew)>=8191)
+    if (fabs(KNew)>=(1<<(bitsK_-1)))
       return false;
-    KNew = wrapAround(KNew,8192);
+    KNew = wrapAround(KNew,1<<(bitsK_-1));
 
     int phiNew  = phi;
 
@@ -819,7 +819,7 @@ void L1TMuonBarrelKalmanAlgo::vertexConstraintOffline(L1MuKBMTrack& track) {
     printf(" K = %d + %f * %f\n",track.curvature(),Gain(0,0),residual);
   }
   
-  int KNew = wrapAround(int(track.curvature()+Gain(0,0)*residual),8192);
+  int KNew = wrapAround(int(track.curvature()+Gain(0,0)*residual),1<<(bitsK_-1));
   int phiNew = wrapAround(int(track.positionAngle()+Gain(1,0)*residual),1<<(bitsPhi_+1));
   int dxyNew = wrapAround(int(track.dxy()+Gain(2,0)*residual),(1<<(bitsPhiB_-1))*phiBScale_);
   if (verbose_)
@@ -846,14 +846,14 @@ void L1TMuonBarrelKalmanAlgo::vertexConstraintLUT(L1MuKBMTrack& track) {
   double residual = -track.dxy();
   uint absK = fabs(track.curvature());
 
-  if (absK>2047)
-    absK = 2047;
+  if (absK > 16383)
+    absK = 16383;
 
   std::pair<float,float> GAIN = lutService_->vertexGain(track.hitPattern(),absK/2);
   track.setKalmanGain(track.step(),fabs(track.curvature()),GAIN.first,GAIN.second,-1);
 
   int k_0 = fp_product(GAIN.first,int(residual),7);
-  int KNew = wrapAround(track.curvature()+k_0,8192);
+  int KNew = wrapAround(track.curvature()+k_0,1<<(bitsK_-1));
 
   if (verbose_) {
     printf("VERTEX GAIN(%d)= %f * %d  = %d\n",absK/2,GAIN.first,int(residual),k_0);
@@ -877,7 +877,7 @@ void L1TMuonBarrelKalmanAlgo::setFloatingPointValues(L1MuKBMTrack& track,bool ve
     etaINT=track.coarseEta();
 
 
-  double lsb = 1.25/float(1 << 13);
+  double lsb = 1.25/float(1 << bitsK_);
   double lsbEta = 0.010875;
 
   
@@ -899,9 +899,9 @@ void L1TMuonBarrelKalmanAlgo::setFloatingPointValues(L1MuKBMTrack& track,bool ve
     K=track.curvatureAtMuon();
     if (K==0)
       K=1;
-
-    if (fabs(K)<46)
-      K=46*K/fabs(K);
+    // *8 is temporary fix for curv bits
+    if (fabs(K)<46*8)
+      K=46*8*K/fabs(K);
     double pt = 1.0/(lsb*fabs(K));
     if (pt<1.6)
       pt=1.6;
@@ -960,10 +960,10 @@ std::pair<bool,L1MuKBMTrack> L1TMuonBarrelKalmanAlgo::chain(const L1MuCorrelator
       printf("Initial K = %f*%d/(1+%f*abs(%d))\n",initK_[seed->depthRegion()-1], address, initK2_[seed->depthRegion()-1], address);
     }
     
-    if (initialK>8191)
-      initialK=8191;
-    if (initialK<-8191)
-      initialK=-8191;
+    if (initialK >= (1<<(bitsK_-1)))
+      initialK=(1<<(bitsK_-1))-1;
+    if (initialK <= -(1<<(bitsK_-1)))
+      initialK=-(1<<(bitsK_-1))+1;
 
     track.setCoordinates(seed->depthRegion(),initialK,correctedPhi(seed,seed->phiRegion()),phiB);
     if (seed->quality()<5) {
@@ -977,7 +977,7 @@ std::pair<bool,L1MuKBMTrack> L1TMuonBarrelKalmanAlgo::chain(const L1MuCorrelator
     L1MuKBMTrack::CovarianceMatrix covariance;  
 
 
-    float DK=512.*512.;
+    float DK=1.0*(1<<(bitsK_+4));
 
     covariance(0,0)=DK;
     covariance(0,1)=0;
@@ -1159,7 +1159,7 @@ void L1TMuonBarrelKalmanAlgo::estimateCompatibility(L1MuKBMTrack& track) {
   for (uint i=0;i<trackCompPattern_.size();++i)  {
     int deltaMax = err*trackCompCut_[i];
     if ( (track.hitPattern()==trackCompPattern_[i] ) && (absK<trackCompCutCurv_[i]) && ((track.approxChi2()>chiSquareCutTight_[i]) || (delta>deltaMax)  )) {
-      track.setCoordinatesAtVertex(8191,track.phiAtVertex(),track.dxy());
+      track.setCoordinatesAtVertex((1<<(bitsK_-1))-1,track.phiAtVertex(),track.dxy());
       break;
     }
   }
@@ -1329,14 +1329,15 @@ int L1TMuonBarrelKalmanAlgo::fp_product(float a,int b, uint bits) {
 
 int L1TMuonBarrelKalmanAlgo::ptLUT(int K) {
   int charge = (K>=0) ? +1 : -1;
-  float lsb=1.25/float(1<<13);
+  float lsb=1.25/float(1<<(bitsK_-1));
   float FK = fabs(K);
 
 
-  if (FK>2047)
-    FK=2047.;   
-  if (FK<26)
-    FK=26.;   
+  if (FK>=(1<<(bitsK_-3)))
+    FK=(1<<(bitsK_-3))-1.;   
+  //TODO find scaling for bitsK_ instead of *8
+  if (FK<26*8)
+    FK=26.*8;   
 
   FK=FK*lsb;
  
