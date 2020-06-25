@@ -877,7 +877,7 @@ void L1TMuonBarrelKalmanAlgo::setFloatingPointValues(L1MuKBMTrack& track,bool ve
     etaINT=track.coarseEta();
 
 
-  double lsb = 1.25/float(1 << bitsK_);
+  double lsb = 1.25/float(1 << (bitsK_-1));
   double lsbEta = 0.010875;
 
   
@@ -977,7 +977,7 @@ std::pair<bool,L1MuKBMTrack> L1TMuonBarrelKalmanAlgo::chain(const L1MuCorrelator
     L1MuKBMTrack::CovarianceMatrix covariance;  
 
 
-    float DK=1.0*(1<<(bitsK_+4));
+    float DK=4096.*4096.;
 
     covariance(0,0)=DK;
     covariance(0,1)=0;
@@ -1328,25 +1328,25 @@ int L1TMuonBarrelKalmanAlgo::fp_product(float a,int b, uint bits) {
 
 
 int L1TMuonBarrelKalmanAlgo::ptLUT(int K) {
-  int charge = (K>=0) ? +1 : -1;
+  //int charge = (K>=0) ? +1 : -1;
   float lsb=1.25/float(1<<(bitsK_-1));
   float FK = fabs(K);
 
 
-  if (FK>=(1<<(bitsK_-3)))
-    FK=(1<<(bitsK_-3))-1.;   
+  if (FK>16376)
+    FK=16376;   
   //TODO find scaling for bitsK_ instead of *8
   if (FK<26*8)
     FK=26.*8;   
 
   FK=FK*lsb;
- 
+  
     //step 1 -material and B-field
-  FK = .7959*FK/(1.0-0.5036*FK);
+  //FK = .88896*FK/(1.0+1.638876*FK);
   //step 2 - misalignment
-  FK = FK-charge*1.047e-04;
+  //FK = FK-charge*3.18734e-05;
   //Get to BMTF scale
-  FK = FK/1.16;
+  //FK = FK/1.15;
 
   int pt=0;
   if (FK!=0)

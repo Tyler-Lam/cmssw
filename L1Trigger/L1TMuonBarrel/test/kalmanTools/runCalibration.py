@@ -155,9 +155,9 @@ DROR = {4:0.173*RELFACTOR,3:0.209*RELFACTOR,2:0.182*RELFACTOR}
 DRORB = {4:(1+0.173),3:(1+0.209),2:(1+0.182)}
 alpha = {4:-0.0523,3:-0.0793,2:-0.0619}
 beta = {4:0.069,3:0.079,2:0.055}
-aPhi = {4:0.0236, 3:0.03794, 2:0.037123, 1: 5.25100}
-aPhiB = {4:-.35931, 3:-0.40417, 2:-.32815, 1: -3.7226}
-aPhiBNLO = 3.9857e-5
+aPhi = {4:0.0236, 3:0.03794, 2:0.037123, 1: 5.21818}
+aPhiB = {4:-.35931, 3:-0.40417, 2:-.32815, 1: -3.93378}
+aPhiBNLO = 5.4005e-05
 trackComp = [-.5781,-.4224,-.24655,-.11516]
 DRORCHI = {4: (726.-433.)/726. ,
            3: (619.-433.)/619. ,
@@ -216,7 +216,7 @@ for s in [1,2,3,4]:
     histos['curv'][s] = ROOT.TH1D("curv_{}".format(s), "", 2048, -4096, 4096)
 
 vertexPhi = ROOT.TH2D("vertexPhi", "",300 , -15000, 15000, 200, -2**16, 2**16)
-vertexPhiB = ROOT.TH2D("vertexPhiB", "", binsk/4, -maxk, maxk, 50, -2048*32, 2048*32)
+vertexPhiB = ROOT.TH2D("vertexPhiB", "", 150, -15000, 15000, 100, -40000,40000)
 vertexELoss = ROOT.TH2D("vertexELoss", "", binsk, -maxk,maxk,binsk,-maxk,maxk)
 phiAt2 = ROOT.TH2D("phiAt2", "", binsk,-maxk,maxk, 1024, -4*512,4*512)    
 
@@ -259,7 +259,7 @@ for event in events:
                 stubPhiB = s.phiB()/PHIBLSB
                 temp = g.phi() - stubPhi - stubPhiB
                 temp = int(temp*PHILSB)
-                vertexPhi.Fill(trueKINT[s.depthRegion()], temp), 
+                vertexPhi.Fill(abs(trueKINT[s.depthRegion()]), math.copysign(1.0,trueKINT[s.depthRegion()])*temp), 
                 vertexELoss.Fill(trueKINT[s.depthRegion()],qPTInt(g.charge()/g.pt()))
                 
                 kInt = trueKINT[s.depthRegion()]
