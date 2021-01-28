@@ -11,8 +11,8 @@ ROOT.FWLiteEnabler.enable()
 #tag='singleMuonOfficial'
 #isData=False
 
-tag='zerobias'
-#tag='zskim'
+#tag='zerobias'
+tag='zskim'
 isData=True
 
 
@@ -379,12 +379,13 @@ fineEtaBMTF = ROOT.TH1D("fineEtaBMTF","fineEtaBMTF",2,0,2)
 
 genPt=ROOT.TH1F("genPt","genPt",50,0,100)
 
-PTThresholds=[0,5,7,10,15,25,30]
+PTThresholds=[0,5,7,10,15,20,25,30]
 genPtKMTF={}
 genPtBMTF={}
 genEtaKMTF={}
 genEtaBMTF={}
-
+genPtKMTFDisp={}
+genEtaKMTFDisp={}
 etaArr=[]
 for i in range(0,21):
     etaArr.append(-0.833+ 2*0.833*i/20.0)
@@ -395,7 +396,8 @@ for p in PTThresholds:
     genPtBMTF[p]=ROOT.TH1F("genPtBMTF_"+str(p),"genPt",50,0,100)
     genEtaKMTF[p]=ROOT.TH1F("genEtaKMTF"+str(p),"genPt",len(etaArr)-1,array('f',etaArr))
     genEtaBMTF[p]=ROOT.TH1F("genEtaBMTF"+str(p),"genEta",len(etaArr)-1,array('f',etaArr))
-
+    genPtKMTFDisp[p]=ROOT.TH1F("genPtKMTFDisp_"+str(p),"genPt",50,0,100)
+    genEtaKMTFDisp[p]=ROOT.TH1F("genEtaKMTFDisp_"+str(p),"genEta",len(etaArr)-1,array('f',etaArr))
 
 
 kfCalibPlus={}
@@ -409,7 +411,7 @@ for track in [3,5,6,7,9,10,11,12,13,14,15]:
 kfCalib = ROOT.TH2D("kfCalib","resKF",560,3.2,143.2,100,0,10)
 bmtfCalib = ROOT.TH2D("bmtfCalib","resKF",280,0.,140,100,0,10)
 
-
+deltaPhiVsK = ROOT.TH2D("deltaPhiVsK", "", 100, -.5, .5, 100, -1, 1)
 
 
 
@@ -417,7 +419,10 @@ bmtfCalib = ROOT.TH2D("bmtfCalib","resKF",280,0.,140,100,0,10)
 
 
 
-genEta=ROOT.TH1F("genEta","genEta",len(etaArr)-1,array('f',etaArr))
+#genEta=ROOT.TH1F("genEta","genEta",len(etaArr)-1,array('f',etaArr))
+genEta = {}
+for p in PTThresholds:
+    genEta[p] = ROOT.TH1F("genEta{}".format(p),"genEta",len(etaArr)-1,array('f',etaArr))
 
 genPhi=ROOT.TH1F("genPhi","genEta",50,-math.pi,math.pi)
 genPhiKMTF=ROOT.TH1F("genPhiKMTF","genPt",50,-math.pi,math.pi)
@@ -451,6 +456,8 @@ events=Events([tag+'.root'])
 counter=-1
 for event in events:
     counter=counter+1
+    if counter%10000 == 0:
+        print("Processed {} events".format(counter))
     #fetch stubs
     stubs=[]
     kmtf=[]
@@ -570,9 +577,11 @@ for event in events:
         genPt.Fill(g.pt())
         ##the eta efficiency we want at the plateau to see strucuture
         if g.pt()>40.0:
-            genEta.Fill(g.eta())
+            #            genEta.Fill(g.eta())
             genPhi.Fill(g.phi())
-
+        for p in PTThresholds:
+            if g.pt() > p + 5:
+                genEta[p].Fill(g.eta())
         #match *(loosely because we still use coarse eta)
         matchedBMTF = filter(lambda x: deltaR(g.eta(),g.phi(),x.eta(),x.phi())<0.3,bmtf)
         matchedKMTF = filter(lambda x: deltaR(g.eta(),g.phi(),x.eta(),x.phi())<0.3,kmtf)
@@ -604,7 +613,7 @@ for event in events:
                 filteredBMTF = filter(lambda x: x.pt()>=float(threshold),matchedBMTF)
                 if len(filteredBMTF)>0:
                     genPtBMTF[threshold].Fill(g.pt())
-                    if g.pt()>40:
+                    if g.pt()>threshold+5:
                         genEtaBMTF[threshold].Fill(g.eta())
 
 
@@ -629,7 +638,7 @@ for event in events:
             K = bestKMTF.charge()/bestKMTF.pt()
             if K==0:
                 K=1;
-
+            deltaPhiVsK.Fill(K, bestKMTF.phi() - g.phi())
 #        if len(matchedKMTF)>0 and len(matchedBMTF)>0:
 #            if bestBMTF.hasFineEta() and (not bestKMTF.hasFineEta()):
 
@@ -649,7 +658,7 @@ for event in events:
                 filteredKMTF = filter(lambda x: x.pt()>=float(threshold),matchedKMTF)
                 if len(filteredKMTF)>0:
                     genPtKMTF[threshold].Fill(g.pt())
-                if len(filteredKMTF)>0 and g.pt()>40:
+                if len(filteredKMTF)>0 and g.pt()>threshold+5:
                     genEtaKMTF[threshold].Fill(g.eta())
 
 #        if (bestKMTF==None or (bestKMTF!=None and bestKMTF.pt()<15))  and bestBMTF!=None and  g.pt()>30 and abs(g.eta())>0.15 and abs(g.eta())<0.32:
@@ -738,6 +747,7 @@ phiCalibKMTF.Write()
 resRBMTF.Write()
 #bmtfCalib.Write()
 #kfCalib.Write()
+deltaPhiVsK.Write()
 genPt.Write()
 
 for p in PTThresholds:
@@ -751,9 +761,9 @@ for p in PTThresholds:
     bmtfEff = ROOT.TGraphAsymmErrors(genPtBMTF[p],genPt)
     bmtfEff.Write("efficiencyVsPtBMTF"+str(p))
 
-    kmtfEff = ROOT.TGraphAsymmErrors(genEtaKMTF[p],genEta)
+    kmtfEff = ROOT.TGraphAsymmErrors(genEtaKMTF[p],genEta[p])
     kmtfEff.Write("efficiencyVsEtaKMTF"+str(p))
-    bmtfEff = ROOT.TGraphAsymmErrors(genEtaBMTF[p],genEta)
+    bmtfEff = ROOT.TGraphAsymmErrors(genEtaBMTF[p],genEta[p])
     bmtfEff.Write("efficiencyVsEtaBMTF"+str(p))
 
 
@@ -763,7 +773,7 @@ for p in PTThresholds:
     genPtKMTF[p].Write("efficiencyDiffVsPt"+str(p))
 
     genEtaKMTF[p].Add(genEtaBMTF[p],-1)
-    genEtaKMTF[p].Divide(genEta)
+    genEtaKMTF[p].Divide(genEta[p])
     genEtaKMTF[p].Write("efficiencyDiffVsEta"+str(p))
 
 
