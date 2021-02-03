@@ -101,7 +101,7 @@ l1t::RegionalMuonCand L1TMuonBarrelKalmanAlgo::convertToBMTF(const L1MuKBMTrack&
 
   int quality = 12 | (rank(track) >> 6);
 
-  int dxy = abs(track.dxy()) >> 9;
+  int dxy = abs(track.dxy()) >> 8;
   if (dxy > 3)
     dxy = 3;
 
@@ -378,7 +378,7 @@ void L1TMuonBarrelKalmanAlgo::propagate(L1MuKBMTrack& track) {
   //Only for the propagation to vertex we use the LUT for better precision and the full function
   if (step == 1) {
     int addr = KBound / 2;
-    // Extra steps to mimic LUT for vertex prop
+    // Extra steps to mimic firmware for vertex prop
     ap_ufixed<11,11> dxyOffset = (int)fabs(aPhiB_[step-1]*addr/(1+charge*aPhiBNLO_[step-1]*addr));
     ap_fixed<12,12> DXY;
     if (addr > 0)
@@ -652,8 +652,8 @@ bool L1TMuonBarrelKalmanAlgo::updateLUT(L1MuKBMTrack& track, const L1MuKBMTCombi
   int phiNew = phi;
 
   //different products for different firmware logic
-  ap_fixed<BITSPHI+5,BITSPHI+5> pbdouble_0 = ap_ufixed<GAIN_4,GAIN_4INT>(GAIN[2])*residualPhi;
-  ap_fixed<BITSPHIB+4,BITSPHIB+4> pb_1 = ap_ufixed<GAIN_5,GAIN_5INT>(GAIN[3])*residualPhiB;
+  ap_fixed<BITSPHI+5,BITSPHI+5> pbdouble_0 = ap_ufixed<GAIN2_4,GAIN2_4INT>(GAIN[2])*residualPhi;
+  ap_fixed<BITSPHIB+24,BITSPHIB+4> pb_1 = ap_ufixed<GAIN2_5,GAIN2_5INT>(GAIN[3])*residualPhiB;
   ap_fixed<BITSPHI+9,BITSPHI+5> pb_0 = ap_ufixed<GAIN_4,GAIN_4INT>(GAIN[2])*residualPhi;
   //int pb_1 = ap_ufixed<GAIN_5,GAIN_5INT>(GAIN[3])*residualPhiB;
   //int pb_0 = ap_ufixed<GAIN_4,GAIN_4INT>(-GAIN[2])*residualPhi;

@@ -91,10 +91,9 @@ for K in range(-2048,2048):
     if abs(K)<26:
         FK=lsb*26
 
-    FK = 0.898*FK/(1.0-0.6*FK);
-    FK=FK-26.382*FK*FK*FK*FK*FK;
-    FK=FK-charge*1.408e-3;
-    FK=FK/1.17;
+    FK = 0.8569*FK/(1.0+.1144*FK)
+    FK = FK-charge*1.23e-3
+    FK=FK/1.17
     if (FK!=0.0):
         pt=int(2.0/FK)
     else:
@@ -103,8 +102,8 @@ for K in range(-2048,2048):
     if pt>511:
         pt=511
 
-    if pt<6:
-        pt=6;
+    if pt<8:
+        pt=8;
     ptLUT[address]=str(pt)    
 
 
