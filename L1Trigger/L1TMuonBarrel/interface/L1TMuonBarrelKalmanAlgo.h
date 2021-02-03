@@ -111,12 +111,28 @@ private:
   static const int BITSPHI = 12;
   static const int BITSPHIB = 13;
   static const int BITSPARAM = 14;
+  static const int GAIN_0 = 9;
+  static const int GAIN_0INT = 6;
+  static const int GAIN_4 = 9;
+  static const int GAIN_4INT = 4;
+  static const int GAIN_V0 = 9;
+  static const int GAIN_V0INT = 3;
+
+  static const int GAIN2_0 = 12;
+  static const int GAIN2_0INT = 8;
+  static const int GAIN2_1 = 12;
+  static const int GAIN2_1INT = 4;
+  static const int GAIN2_4 = 12;
+  static const int GAIN2_4INT = 4;
+  static const int GAIN2_5 = 12;
+  static const int GAIN2_5INT = 0;
+  /*
   static const int GAIN_0 = 18;
   static const int GAIN_0INT = 7;
   static const int GAIN_1 = 18;
   static const int GAIN_1INT = 4;
   static const int GAIN_4 = 18;
-  static const int GAIN_4INT = 5;
+  static const int GAIN_4INT = 4;
   static const int GAIN_5 = 18;
   static const int GAIN_5INT = 0;
 
@@ -130,19 +146,6 @@ private:
   static const int GAIN2_5INT = 0;
   static const int GAIN_V0 = 18;
   static const int GAIN_V0INT = 3;
-
-
-  /*
-  static const int LUT0 = 11;
-  static const int LUT0INT = 8;
-  static const int LUT1 = 9;
-  static const int LUT1INT = 4;
-  static const int LUT4 = 9;
-  static const int LUT4INT = 4;
-  static const int LUT5 = 9;
-  static const int LUT5INT = 0;
-  static const int LUTV0 = 10;
-  static const int LUTV0INT = 3;
   */
   //STUFF NOT USED IN THE FIRMWARE BUT ONLY FOR DEBUGGING
   ///////////////////////////////////////////////////////
