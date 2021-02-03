@@ -33,20 +33,15 @@ bmtfKalmanTrackingSettings = cms.PSet(
     trackCompErr2 = cms.vdouble(0.218750,0.218750,0.218750,0.3125),   
     trackCompCutPattern = cms.vint32(3,5,6,9,10,12),   
     trackCompCutCurvMax = cms.vint32(34,34,34,34,34,34),   #this is shifted<<4
-    trackCompCut        = cms.vint32(15,15,15,15,15,15),  
-#    trackCompCut        = cms.vint32(15,15,12,15,15,10),  
+    trackCompCut        = cms.vint32(15,15,15,15,15),  
+    #trackCompCut        = cms.vint32(15,15,15,15,15,15),  
+    #chiSquareCutTight   = cms.vint32(40,126,60,126,126,126),  
     chiSquareCutTight   = cms.vint32(40,126,60,126,126,126),  
-#    chiSquareCutTight   = cms.vint32(40,50,40,90,60,50),  
 
     combos4=cms.vint32(9,10,11,12,13,14,15),
     combos3=cms.vint32(5,6,7),
     combos2=cms.vint32(3),
     combos1=cms.vint32(), #for future possible usage
-
-    #combos4=cms.vint32(9,10,11,12,13,14,15),
-    #combos3=cms.vint32(5,6,7),
-    #combos2=cms.vint32(3),
-    #combos1=cms.vint32(), #for future possible usage
 
     useOfflineAlgo = cms.bool(False),   
     ###Only for the offline algo -not in firmware --------------------
