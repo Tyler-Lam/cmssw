@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 bmtfKalmanTrackingSettings = cms.PSet(
     verbose = cms.bool(False),  # 
-    lutFile = cms.string("L1Trigger/L1TMuon/data/bmtf_luts/packedGainLUTs.root"),
+    lutFile = cms.string("L1Trigger/L1TMuon/data/bmtf_luts/kalmanLUTs.root"),
     initialK = cms.vdouble(-1.196,-1.581,-2.133,-2.263),
     initialK2 = cms.vdouble(-3.26e-4,-7.165e-4,2.305e-3,-5.63e-3),
 #    eLoss = cms.vdouble(-2.85e-4,-6.21e-5,-1.26e-4,-1.23e-4), 
@@ -19,9 +19,6 @@ bmtfKalmanTrackingSettings = cms.PSet(
     etaLUT1 = cms.vdouble(0.159,0.116,0.088,0.128),
     #generic cuts
     chiSquare = cms.vdouble(0.0,0.109375,0.234375,0.359375),   
-#    chiSquareCutPattern = cms.vint32(3,5,6,7,11,13,14,15),
-#    chiSquareCutCurvMax = cms.vint32(2500,2500,2500,2500,2500,2500,2500,2500),
-#    chiSquareCut = cms.vint32(126,126,126,126,126,126,126,126),
     chiSquareCutPattern = cms.vint32(7,11,13,14,15),
     chiSquareCutCurvMax = cms.vint32(2500,2500,2500,2500,2500),
     chiSquareCut = cms.vint32(126,126,126,126,126),
@@ -33,9 +30,7 @@ bmtfKalmanTrackingSettings = cms.PSet(
     trackCompErr2 = cms.vdouble(0.218750,0.218750,0.218750,0.3125),   
     trackCompCutPattern = cms.vint32(3,5,6,9,10,12),   
     trackCompCutCurvMax = cms.vint32(34,34,34,34,34,34),   #this is shifted<<4
-    trackCompCut        = cms.vint32(15,15,15,15,15),  
-    #trackCompCut        = cms.vint32(15,15,15,15,15,15),  
-    #chiSquareCutTight   = cms.vint32(40,126,60,126,126,126),  
+    trackCompCut        = cms.vint32(15,15,15,15,15,15),  
     chiSquareCutTight   = cms.vint32(40,126,60,126,126,126),  
 
     combos4=cms.vint32(9,10,11,12,13,14,15),
@@ -58,15 +53,15 @@ bmtfKalmanTrackingSettings = cms.PSet(
 
 simKBmtfDigis = cms.EDProducer("L1TMuonBarrelKalmanTrackProducer",
     src = cms.InputTag("simKBmtfStubs"),
-    bx = cms.vint32(-2,-1,0,1,2),
-#    bx = cms.vint32(0),
+#    bx = cms.vint32(-2,-1,0,1,2),
+    bx = cms.vint32(0),
     algoSettings = bmtfKalmanTrackingSettings,
     trackFinderSettings = cms.PSet(
         sectorsToProcess = cms.vint32(0,1,2,3,4,5,6,7,8,9,10,11),
         verbose = cms.int32(0),
         sectorSettings = cms.PSet(
-#            verbose = cms.int32(1),
-            verbose = cms.int32(0),
+            verbose = cms.int32(1),
+#            verbose = cms.int32(0),
             wheelsToProcess = cms.vint32(-2,-1,0,1,2),
             regionSettings = cms.PSet(
                 verbose=cms.int32(0)
